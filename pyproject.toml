@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "red-room"
+version = "0.1.0"
+description = "Collaborative agent red-teaming on Switch, powered by Invaris AgentSec."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Invaris Labs" }]
+dependencies = [
+  "invaris-agentsec==0.9.0",
+  "requests>=2.31",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+redroom = "redroom.cli:main"
+
+[tool.setuptools]
+packages = ["redroom", "redroom.packs"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

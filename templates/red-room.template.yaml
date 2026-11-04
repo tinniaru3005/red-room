@@ -1,0 +1,39 @@
+# Red Room: a security workroom. A red-team agent tests a target agent in front of the team; a
+# human approves any fix; a coder patches it in a linked room; the red-team agent re-verifies.
+#
+# Modeled on Switch's own examples/room-templates/red-blue-workroom.template.yaml. Instantiate it
+# from Switch Console ("Create from template"); it provisions the room, puts the agents and you in
+# it, and posts the kickoff so work starts.
+params:
+  target_name:
+    type: string
+    description: Short name of the agent being hardened (used in the room name)
+  redteam_agent:
+    type: agent
+    description: The Red Room agent (runs AgentSec and drives the loop)
+  reproducer_agent:
+    type: agent
+    description: A second agent that independently reproduces a finding
+  approver:
+    type: user
+    description: The human who must approve any fix
+  bridge:
+    type: bridge
+    description: Where the room is mirrored (Slack/Mattermost/Discord/...)
+    default: [$first]
+room:
+  name: "Red Room: ship {target_name}"
+  description: "Red-team {target_name}, approve the fix, prove it's fixed -- in the room."
+  channel_type: channel_private
+  bridge: "{bridge}"
+  agents: ["{redteam_agent}", "{reproducer_agent}"]
+  users: ["{approver}", "{$creator}"]
+  instructions: |
+    This room hardens {target_name} before launch. {redteam_agent} runs AgentSec against it,
+    posts each finding with its evidence and OWASP tag, and asks {reproducer_agent} to reproduce
+    the critical one. No fix is applied until {approver} approves it here. After a fix,
+    {redteam_agent} re-runs the exact failing scenarios and posts the REPRODUCED -> FIXED proof.
+kickoff: |
+  @{redteam_agent} -- begin a security engagement against {target_name}. Post findings here,
+  have @{reproducer_agent} reproduce the most severe one, then wait for @{approver} to approve a
+  fix before anything changes.

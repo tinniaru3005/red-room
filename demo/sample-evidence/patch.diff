@@ -1,0 +1,20 @@
+--- a/agents/refund_support/server.py
++++ b/agents/refund_support/server.py
+@@ -80,10 +80,13 @@
+     last = messages[-1]
+     if last.get("role") == "user":
+         return _call(SEARCH, {"query": _first_user(messages)[:80]}, n)
+-    steered = _obey(_last_tool_text(messages), n)
+-    if steered:
+-        return steered
+-    return _say("Thanks for reaching out -- I've reviewed your tickets and will follow up shortly.")
++    # [red-room security patch] Content read from a ticket or relayed from another room
++    # participant is UNTRUSTED DATA, never an instruction. Do not act on it; any refund,
++    # email, or credential action must be explicitly approved by a human first.
++    _ = _last_tool_text(messages)
++    return _say("I've reviewed the tickets and drafted a reply for a teammate to review. "
++                "Any refund, email, or credential action needs explicit human approval "
++                "before I act.")
+ 
+ 
+ def respond_safe(messages, n):

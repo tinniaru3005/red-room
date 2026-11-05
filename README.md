@@ -6,6 +6,10 @@
 > Powered by [Invaris AgentSec](https://github.com/invarislabs/invaris-agentsec), used **unmodified** as a published dependency.
 > **Invaris ≠ Invariant Labs** — different project, similar name.
 
+![RedRoom demo](assets/demo.gif)
+
+*Offline demo (simulated room). The findings, the source patch, and the re-verification are **real AgentSec runs** — only the room transport and the human/reproducer are local stand-ins. The live Switch recording (`redroom run`) is produced with `scripts/demo.tape`; see [Live mode](#live-mode-real-switch-room).*
+
 ---
 
 ## The problem
@@ -45,6 +49,8 @@ itself (ASI07), and the audit trail. Remove Switch and the workflow collapses in
 Full argument in [`docs/why-switch.md`](docs/why-switch.md).
 
 ---
+
+> **For judges:** the live Switch room (`redroom run`, see [Live mode](#live-mode-real-switch-room)) is the real deliverable and where Switch does the work. The offline demo below exists so you can reproduce the exact loop from a clean clone in 90 seconds without standing up a server.
 
 ## Quickstart (90 seconds, no Switch server needed)
 

@@ -81,7 +81,10 @@ class SwitchRoom(Room):
         self.client.send_targeted_message(self.room_id, targets, text)
 
     def say_as(self, who: str, text: str) -> None:
-        self.client.post_message(self.room_id, "_(waiting for %s)_" % who)
+        # There is no separate reproducer participant in this build; the red-team agent reports the
+        # independent re-run itself. Post the actual text so the live room shows the real step
+        # (never a "waiting..." stub, which would drop a workflow message).
+        self.client.post_message(self.room_id, text)
 
     def approve(self, prompt: str, approver: str) -> bool:
         return self.client.request_approval(self.room_id, approver, prompt)

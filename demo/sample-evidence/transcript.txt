@@ -163,3 +163,7 @@ _Every step above happened in this room. Switch is the coordination fabric, the 
 
 [agentsec-redteam]
     Audit trail + artifacts written (demo/out/). Done.
+
+[agentsec-redteam]
+    ═══  VERDICT  ═══
+    Inter-agent injection (OWASP ASI07) found → reproduced → human-approved → patched in source → re-verified FIXED, with the legitimate workflow intact. All of it in the room.

@@ -136,4 +136,9 @@ def run_engagement(room: Room, repo_root: Path, approver: str = APPROVER,
                                            fixed, still, ev, diff))
     room.post("Audit trail + artifacts written (demo/out/). Done.")
     result["success"] = bool(headline_fixed and legit.still_works)
+    if result["success"]:
+        room.post("═══  VERDICT  ═══\n"
+                  "Inter-agent injection (OWASP ASI07) found → reproduced → human-approved → "
+                  "patched in source → re-verified FIXED, with the legitimate workflow intact. "
+                  "All of it in the room.")
     return result

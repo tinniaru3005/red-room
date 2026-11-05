@@ -26,11 +26,22 @@ def _run(args) -> int:
         return 2
     from .switch_client import SwitchClient
     client = SwitchClient(cfg.base_url, cfg.api_key, cfg.agent_id)
-    client.connect(cfg.room_id)
+    try:
+        client.connect(cfg.room_id)   # preflight + stream + connect_to_room; raises on failure
+    except SwitchClient.SwitchError as e:
+        print("Live Switch connection failed — NOT falling back to the offline simulation.\n  %s"
+              % e, file=sys.stderr)
+        client.close()
+        return 2
     try:
         room = SwitchRoom(client, cfg.room_id, cfg.fix_room_id)
+        print("Connected to Switch room %s as agent %s. Driving the live engagement."
+              % (cfg.room_id, cfg.agent_id), file=sys.stderr)
         run_engagement(room, repo_root(), approver=args.approver,
                        auto_approve=False, offline=False)
+    except Exception as e:  # surface the failing step; do not silently simulate
+        print("Live engagement failed mid-run: %s" % e, file=sys.stderr)
+        return 2
     finally:
         client.close()
     return 0

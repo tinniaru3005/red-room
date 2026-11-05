@@ -28,3 +28,16 @@ def test_designated_approver_approves():
 def test_other_participant_cannot_approve():
     c = _FakeClient([_msg("mallory", "approve"), _msg("ada", "decline")])
     assert c.request_approval("room1", "ada", "ok?", timeout_s=2) is False
+
+
+def test_substring_name_is_not_the_approver():
+    # Codex P1 regression: a participant ("ann") whose name is a substring of the approver
+    # ("joanne") must NOT be accepted as the approver.
+    c = _FakeClient([_msg("ann", "approve"), _msg("joanne", "decline")])
+    assert c.request_approval("room1", "joanne", "ok?", timeout_s=2) is False
+
+
+def test_partial_approver_name_times_out():
+    # Only an exact match counts; a near/partial name never approves.
+    c = _FakeClient([_msg("ann", "approve")])
+    assert c.request_approval("room1", "joanne", "ok?", timeout_s=1) is False

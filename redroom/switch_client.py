@@ -194,8 +194,8 @@ class SwitchClient:
         a = approver.strip().lower()
         for field in ("sender_name", "on_behalf_of", "sender"):
             v = str(payload.get(field) or "").lower()
-            if v and (a == v or a in v or v in a):
-                return True
+            if v and a == v:   # exact, normalized match only -- never substring (a participant
+                return True        # whose name is a substring of the approver's must NOT qualify)
         return False
 
     def request_approval(self, room_id: str, approver: str, prompt: str,

@@ -13,8 +13,8 @@ Linked room  #fix-refund-agent
 - **`redroom/switch_client.py`** — Switch agent protocol (SSE down, HTTP up): register, stream,
   heartbeat, `connect_to_room`, `post_message`, `send_targeted_message`, approval, room document.
 - **`redroom/orchestrator.py`** — the workflow / state machine.
-- **`redroom/agentsec_runner.py`** — shells out to the **published, unmodified** `agentsec` CLI and
-  reads its `report.json`. AgentSec is a dependency, never edited.
+- **`redroom/agentsec_runner.py`** — shells out to the published `agentsec` CLI and
+  reads its `report.json`.
 - **`redroom/coding_agent.py`** — applies a **real source patch** to the vulnerable code path.
 - **`redroom/legitimacy.py`** — proves the patched agent still does legitimate work.
 - **`redroom/packs/room_injection.py`** — the new capability, delivered as an AgentSec *attack pack*

@@ -3,12 +3,11 @@
 **Collaborative agent red-teaming on [Switch](https://www.switchagents.ai/) — find a vulnerability in a teammate agent, get a human to approve the fix, and prove it's fixed, all inside your team chat.**
 
 > Built for the **Flip the Switch** hackathon (Track 01 — Best Business Workflow).
-> Powered by [Invaris AgentSec](https://github.com/invarislabs/invaris-agentsec), used **unmodified** as a published dependency.
-> **Invaris ≠ Invariant Labs** — different project, similar name.
+> 📖 **Read the build story:** [7 critical findings → 0, approved in the room](https://arunima-chaudhuri.hashnode.dev/7-critical-findings-to-0-approved-in-the-room-red-teaming-ai-agents-on-switch)
 
 ![RedRoom demo](assets/demo.gif)
 
-*Offline demo (simulated room). The findings, the source patch, and the re-verification are **real AgentSec runs** — only the room transport and the human/reproducer are local stand-ins. The live Switch recording (`redroom run`) is produced with `scripts/demo.tape`; see [Live mode](#live-mode-real-switch-room).*
+*Offline demo (simulated room). The findings, the source patch, and the re-verification are **real AgentSec runs** — only the room transport and the human/reproducer are local stand-ins. For the live Switch run (`redroom run`), see [Live mode](#live-mode-real-switch-room).*
 
 ---
 
@@ -39,8 +38,7 @@ A human asks a security agent, **in the room**, to red-team a teammate agent bef
    room document as an audit trail.
 
 The headline finding is the one nobody else catches: a refund/email **triggered by a message
-relayed from another agent**. Red Room adds that check to AgentSec as an external attack pack —
-**without changing a line of AgentSec**.
+relayed from another agent**. Red Room adds that check as an external AgentSec attack pack.
 
 ## Why Switch is essential
 
@@ -54,18 +52,25 @@ Full argument in [`docs/why-switch.md`](docs/why-switch.md).
 
 ## Quickstart (90 seconds, no Switch server needed)
 
+**Prerequisites:** Python 3.10+, `git`, and [`just`](https://github.com/casey/just) (install with `brew install just`, `cargo install just`, or your package manager).
+
 ```bash
-git clone <this repo> && cd red-room
-just setup          # python3 -m venv .venv && pip install -e ".[dev]"   (pulls invaris-agentsec)
+git clone https://github.com/tinniaru3005/red-room && cd red-room
+just setup          # creates .venv, installs Red Room + invaris-agentsec
 just demo           # the whole loop, offline, in your terminal
+just test           # unit + full offline end-to-end test
 ```
 
 `just demo` spins up the bundled vulnerable agent, runs **real AgentSec scans** (before and after
 the fix), applies a **real source patch**, and prints the room transcript ending in
 `ATTACK BLOCKED` + `legitimate workflow STILL PASSES`. Nothing is faked.
 
+**No `just`?** Run the same steps directly:
+
 ```bash
-just test           # unit + full offline end-to-end test
+python3 -m venv .venv && .venv/bin/pip install -U pip && .venv/bin/pip install -e ".[dev]"
+.venv/bin/redroom demo --offline --auto-approve   # demo
+.venv/bin/pytest -q                                # tests
 ```
 
 ## Live mode (real Switch room)
@@ -85,25 +90,33 @@ document. Details in [`docs/live-switch.md`](docs/live-switch.md).
 
 ## How it's built
 
-| Piece | File | Modifies AgentSec? |
-|---|---|---|
-| Switch agent-protocol client | `redroom/switch_client.py` | No |
-| Workflow state machine | `redroom/orchestrator.py` | No |
-| AgentSec driver (shells out to the published CLI) | `redroom/agentsec_runner.py` | No |
-| **New capability: inter-agent injection (ASI07)** | `redroom/packs/room_injection.py` | No — external attack pack |
-| Reference agent (vulnerable / `--safe`) | `agents/refund_support/server.py` | No |
-| **Coding agent: real source patch** | `redroom/coding_agent.py` | No |
-| Legitimate-workflow regression probe | `redroom/legitimacy.py` | No |
+| Piece | File |
+|---|---|
+| Switch agent-protocol client | `redroom/switch_client.py` |
+| Workflow state machine | `redroom/orchestrator.py` |
+| AgentSec driver (shells out to the published CLI) | `redroom/agentsec_runner.py` |
+| **New capability: inter-agent injection (ASI07)** | `redroom/packs/room_injection.py` |
+| Reference agent (vulnerable / `--safe`) | `agents/refund_support/server.py` |
+| **Coding agent: real source patch** | `redroom/coding_agent.py` |
+| Legitimate-workflow regression probe | `redroom/legitimacy.py` |
 
-AgentSec is pinned (`invaris-agentsec==0.9.0`) and only ever *called*. The new ASI07 check ships as
-an AgentSec **attack pack** — `CATEGORIES` + `EVALUATORS` loaded through the policy's `attack_packs:`
-list, exactly the extension point AgentSec documents. So Red Room adds a real new testing capability
-while leaving AgentSec — and its users — completely untouched. See
-[`docs/architecture.md`](docs/architecture.md).
+The ASI07 check ships as an external attack pack, loaded through the policy's `attack_packs:` list. See [`docs/architecture.md`](docs/architecture.md).
 
-## Demo
+## Evidence you can trace
 
-A 2–3 minute two-column script is in [`demo/DEMO.md`](demo/DEMO.md).
+Every claim Red Room makes points to a real artifact a judge can open — no screenshots to trust, no numbers to take on faith. A run writes these to `demo/out/` (sample copies are committed in [`demo/sample-evidence/`](demo/sample-evidence/)):
+
+| Claim | Proof artifact |
+|---|---|
+| "It found a real vulnerability" | `before/report.json` + the finding card (trace of the actual `issue_refund` call) |
+| "It's not a fluke" | `reproduce/report.json` — an independent re-run (different seed) with the same finding id |
+| "A human approved it" | the approval message in the room + the room audit document |
+| "The fix is real code" | `patch.diff` — a unified diff of the vulnerable function, not a flag |
+| "The attack is actually blocked" | `after/report.json` — 0 findings, scenario re-tested (status `passed`) |
+| "It didn't just gag the agent" | `legitimate.json` — the benign workflow still searches and replies |
+| "Switch did the work" | the Mattermost room + the room document (live mode) |
+
+A finding is only counted **fixed** when it is gone **and** its scenario was genuinely re-tested — an errored or inconclusive scan never passes as a fix.
 
 ## What's real vs simulated (read this — it's honest)
 
@@ -134,7 +147,7 @@ end-to-end against a live Switch Console on this machine. See [Limitations](#lim
 
 - **Live Switch E2E is unverified here.** Standing up Switch Console (Electron + Docker + Mattermost)
   wasn't possible in the build environment. The offline demo is the verified path; the live client is
-  code-complete but should be smoke-tested against your own Switch server before the live demo.
+  code-complete but should be smoke-tested against your own Switch server before you rely on it.
 - The reproducer and coding agent are **deterministic** (rule-based), not LLM agents — a deliberate
   choice for a reliable, reproducible demo. The architecture supports swapping in model-backed agents
   later.
@@ -145,7 +158,7 @@ end-to-end against a live Switch Console on this machine. See [Limitations](#lim
 redroom/            # the agent + orchestration (all new work)
   switch_client.py  orchestrator.py  agentsec_runner.py  reporting.py  room.py  cli.py
   coding_agent.py   legitimacy.py    target_process.py   config.py
-  packs/room_injection.py      # the ASI07 attack pack (loaded by AgentSec, not part of it)
+  packs/room_injection.py      # the ASI07 attack pack
 agents/refund_support/         # vulnerable / --safe reference agent under test
 policies/redroom.agentsec.yaml # AgentSec policy (loads the pack)
 templates/red-room.template.yaml
@@ -154,4 +167,13 @@ demo/  docs/  tests/
 
 ## License
 
-Apache-2.0. "Invaris" and "AgentSec" are trademarks of Invaris Labs.
+Apache-2.0.
+
+## Acknowledgements
+
+Red Room builds on and is grateful to:
+
+- **[Switch](https://www.switchagents.ai/)** by **SandboxAQ** — the agent collaboration platform this project runs on.
+- **[Invaris AgentSec](https://github.com/invarislabs/invaris-agentsec)** by **[Invaris Labs](https://www.invarislabs.com/)** — the open-source agent security engine Red Room uses to run the tests.
+- **WeMakeDevs** and **DevTools Academy** — organizers of the Flip the Switch hackathon.
+- AI developer tools — **Claude Code** and **ChatGPT** — used for design discussion, code review, and documentation.

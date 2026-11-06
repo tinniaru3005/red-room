@@ -16,7 +16,7 @@ the work. Two environments are involved:
 
 ## B. Register the Red Room agent  **[REPO]**
 ```bash
-cd ~/Documents/red-room
+cd red-room
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 cp .env.example .env
 # edit .env: set SWITCH_BASE_URL=http://localhost:8000  and  SWITCH_REGISTRATION_TOKEN=<the key>
@@ -54,13 +54,6 @@ In Switch, **membership decides what an agent is shown; addressing decides what 
 agent is a room member, so it receives your `approve` message regardless of its addressing policy —
 and `redroom run` reads that message off the event stream and matches it to the named approver. You
 do **not** need to widen the agent's addressing policy for the approval to register.
-
-## Recording (see scripts/)
-- Offline GIF (anywhere): `vhs scripts/demo.tape` → `assets/demo.gif`.
-- **Live** MP4 + GIF: `vhs scripts/demo-live.tape` → `assets/demo-live.mp4`, `assets/demo-live.gif`
-  (does not touch the offline GIF). After you confirm it, swap it into the README:
-  `cp assets/demo-live.gif assets/demo.gif`. To shrink/speed a long capture:
-  `ffmpeg -i assets/demo-live.mp4 -vf "setpts=0.6*PTS,fps=12,scale=1000:-1:flags=lanczos" assets/demo.gif`
 
 ## Troubleshooting
 | Symptom | Cause | Fix |

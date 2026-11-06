@@ -11,3 +11,6 @@ build/
 *.report.json
 demo/out/
 scripts/
+.DS_Store
+*.mov
+*.mp4

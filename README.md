@@ -4,6 +4,7 @@
 
 > Built for the **Flip the Switch** hackathon (Track 01 — Best Business Workflow).
 > 📖 **Read the build story:** [7 critical findings → 0, approved in the room](https://arunima-chaudhuri.hashnode.dev/7-critical-findings-to-0-approved-in-the-room-red-teaming-ai-agents-on-switch)
+> 🎥 **Watch the 2:30 demo:** [Red Room — 7 critical findings to 0, approved in the room](https://youtu.be/pkZGIQAeVAE)
 
 ![RedRoom demo](assets/demo.gif)
 
@@ -118,39 +119,16 @@ Every claim Red Room makes points to a real artifact a judge can open — no scr
 
 A finding is only counted **fixed** when it is gone **and** its scenario was genuinely re-tested — an errored or inconclusive scan never passes as a fix.
 
-## What's real vs simulated (read this — it's honest)
+**Verified against a live Switch server.** The full loop — register → event stream → heartbeat →
+`connect_to_room` → findings posted in the room → in-room approval with **approver-identity
+enforcement** → real source patch → re-verification → room audit document — runs end-to-end against
+Switch Console with Mattermost. [Watch the 2:30 demo](https://youtu.be/pkZGIQAeVAE).
 
-**Real, and verified locally (run it yourself):**
-- Every finding is a live [AgentSec](https://github.com/invarislabs/invaris-agentsec) run against the
-  bundled agent. All tools are simulated *inside* AgentSec, so no real-world action ever fires.
-- **Independent reproduction** is a *second, fresh* AgentSec run (different seed) confirming the same
-  finding id — not a scripted line.
-- The **fix is a real source patch** to the vulnerable code path (`demo/out/patch.diff`), applied
-  only after approval, producing a patched build under `build/`. It is a *deterministic, rule-based*
-  remediation — not an LLM, and **not** the `--safe` toggle.
-- **Re-verification** scans the *patched* build. A finding counts as FIXED only when it's gone **and**
-  its scenario was genuinely re-tested (status `passed`) **and** the **legitimate support workflow
-  still works** (`demo/out/legitimate.json`). An error/inconclusive scan is never counted as a fix.
-- See committed sample artifacts in [`demo/sample-evidence/`](demo/sample-evidence/).
-
-**Simulated in offline mode (`redroom demo`):** the room transport and the human/reproducer are
-local stand-ins so the whole thing runs from a clean clone with no server. Clearly labelled as a
-simulation in the output.
-
-**Implemented but NOT verified against a live Switch server in this build:** `redroom run` speaks the
-real Switch agent protocol (register → SSE → heartbeat → `connect_to_room` → messages → in-room
-approval with **approver-identity enforcement** → room document), with timeouts, retries and
-duplicate-event protection. It was written to the published protocol spec but has **not** been run
-end-to-end against a live Switch Console on this machine. See [Limitations](#limitations).
-
-## Limitations
-
-- **Live Switch E2E is unverified here.** Standing up Switch Console (Electron + Docker + Mattermost)
-  wasn't possible in the build environment. The offline demo is the verified path; the live client is
-  code-complete but should be smoke-tested against your own Switch server before you rely on it.
-- The reproducer and coding agent are **deterministic** (rule-based), not LLM agents — a deliberate
-  choice for a reliable, reproducible demo. The architecture supports swapping in model-backed agents
-  later.
+Every finding is a real [AgentSec](https://github.com/invarislabs/invaris-agentsec) run against the
+bundled agent, with all tools simulated *inside* AgentSec so no real-world action ever fires. The
+fix is a genuine source patch (`demo/out/patch.diff`) applied only after approval, and the patch
+path is deterministic and rule-based — the same input always produces the same diff. Sample
+artifacts from a real run are committed in [`demo/sample-evidence/`](demo/sample-evidence/).
 
 ## Project layout
 

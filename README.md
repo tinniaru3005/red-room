@@ -3,7 +3,9 @@
 **Collaborative agent red-teaming on [Switch](https://www.switchagents.ai/) — find a vulnerability in a teammate agent, get a human to approve the fix, and prove it's fixed, all inside your team chat.**
 
 > Built for the **Flip the Switch** hackathon (Track 01 — Best Business Workflow).
+> 
 > 📖 **Read the build story:** [7 critical findings → 0, approved in the room](https://arunima-chaudhuri.hashnode.dev/7-critical-findings-to-0-approved-in-the-room-red-teaming-ai-agents-on-switch)
+> 
 > 🎥 **Watch the 2:30 demo:** [Red Room — 7 critical findings to 0, approved in the room](https://youtu.be/pkZGIQAeVAE)
 
 ![RedRoom demo](assets/demo.gif)

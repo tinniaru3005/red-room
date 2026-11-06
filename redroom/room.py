@@ -78,7 +78,16 @@ class SwitchRoom(Room):
         self.client.post_message(self.room_id, text)
 
     def targeted(self, targets: List[str], text: str) -> None:
-        self.client.send_targeted_message(self.room_id, targets, text)
+        try:
+            self.client.send_targeted_message(self.room_id, targets, text)
+        except Exception as e:  # noqa: BLE001 - re-raised unless it is the known stand-in case
+            # Some workflow roles (the reproducer) are local stand-ins and are not registered as
+            # real participants in this room. The step itself is real and belongs in the
+            # transcript, so post it un-addressed rather than dropping it. Targets that DO exist
+            # (the human approver) still get a genuinely targeted message.
+            if "not in room" not in str(e):
+                raise
+            self.client.post_message(self.room_id, text)
 
     def say_as(self, who: str, text: str) -> None:
         # There is no separate reproducer participant in this build; the red-team agent reports the
